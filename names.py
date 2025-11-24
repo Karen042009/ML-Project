@@ -1,0 +1,10 @@
+# Data Loading and Processing
+TOP_BROWSERS_IMAGE_PATH = "materials/top_10_browsers.png"
+DEVICE_DISTRIBUTION_IMAGE_PATH = "materials/device_distribution.png"
+TOP_PAGES_IMAGE_PATH = "materials/top_10_pages.png"
+TOP_REFERRERS_IMAGE_PATH = "materials/top_10_referrers.png"
+HOURLY_ACTIVITY_IMAGE_PATH = "materials/hourly_activity.png"
+WEEKLY_ACTIVITY_IMAGE_PATH = "materials/weekly_activity.png"
+DAILY_VISITS_TREND_IMAGE_PATH = "materials/daily_visits_trend.png"
+CLASS_IMBALANCE_IMAGE_PATH = "materials/class_imbalance.png"
+PAIRPLOT_IMAGE_PATH = "materials/features_pairplot.png"
