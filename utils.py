@@ -26,7 +26,6 @@ def get_data(file_path="data/visits.csv"):
 
 
 def clean_data(df):
-    """Cleans data: fills missing values and drops unnecessary columns."""
     if "referrer" in df.columns:
         df["referrer"] = df["referrer"].fillna("direct")
 
@@ -52,7 +51,6 @@ def clean_data(df):
 
 
 def engineer_features(df):
-    """Adds new features (e.g. IP statistics, time cycles)."""
     if "user_agent_raw" in df.columns:
         df["is_user_agent_bot"] = df["user_agent_raw"].str.contains(
             "bot|crawler|spider", case=False, na=False
@@ -62,7 +60,6 @@ def engineer_features(df):
         df["visits_per_ip"] = df.groupby("ip_address")["timestamp"].transform("count")
         df["unique_paths_per_ip"] = df.groupby("ip_address")["path"].transform("nunique")
         
-        # Sort for time diff calculation
         df = df.sort_values(by=["ip_address", "timestamp"])
         time_diff = df.groupby("ip_address")["timestamp"].diff().dt.total_seconds()
         df["time_since_last_visit_ip"] = time_diff.fillna(time_diff.mean())
@@ -82,7 +79,6 @@ def engineer_features(df):
 
 
 def encode_features(df):
-    """Performs LabelEncoding and prepares data for the model."""
     encoders = {}
     categorical_cols = ["browser", "os", "device", "referrer", "path"]
 
@@ -115,7 +111,6 @@ def encode_features(df):
     ]
     
     df_model_ready = df.drop(columns=columns_to_drop_for_model, errors="ignore")
-    # Ensure all data is numeric
     df_model_ready = df_model_ready.apply(pd.to_numeric, errors="coerce").fillna(0)
     
     return df, df_model_ready
@@ -124,7 +119,6 @@ def encode_features(df):
 def run_visualizations(dataframe):
     sns.set(style="whitegrid")
     
-    # Ensure directory exists
     os.makedirs("materials", exist_ok=True)
 
     if "browser" in dataframe.columns:
@@ -311,7 +305,6 @@ def train_model(df_model_ready):
     X = df_model_ready.drop("is_bot", axis=1)
     y = df_model_ready["is_bot"]
 
-    # Train/Test Split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     scaler = StandardScaler()
@@ -332,7 +325,6 @@ def train_model(df_model_ready):
     )
     model.fit(X_train_scaled, y_train)
 
-    # Evaluation
     print("\n--- Model Evaluation ---")
     y_pred = model.predict(X_test_scaled)
     print(classification_report(y_test, y_pred))
@@ -340,7 +332,6 @@ def train_model(df_model_ready):
     models_dir = "models"
     os.makedirs(models_dir, exist_ok=True)
 
-    # Save scaler and model
     joblib.dump(scaler, os.path.join(models_dir, "Scaler.pkl"))
     joblib.dump(model, os.path.join(models_dir, "Random_forest_model.pkl"))
     print(f"Model saved to {models_dir}")

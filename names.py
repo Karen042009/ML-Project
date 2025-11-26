@@ -1,4 +1,3 @@
-# Data Loading and Processing
 TOP_BROWSERS_IMAGE_PATH = "materials/top_10_browsers.png"
 DEVICE_DISTRIBUTION_IMAGE_PATH = "materials/device_distribution.png"
 TOP_PAGES_IMAGE_PATH = "materials/top_10_pages.png"
