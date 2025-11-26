@@ -10,11 +10,20 @@ import os
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
-from names import *
+from sklearn.metrics import classification_report
+from typing import Tuple, Optional
+import names
 
+def get_data(file_path: str = names.DATA_FILE_PATH) -> pd.DataFrame:
+    """
+    Load data from a CSV file.
 
-def get_data(file_path="data/visits.csv"):
+    Args:
+        file_path (str): Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: Loaded data.
+    """
     try:
         df_raw = pd.read_csv(file_path)
         df = df_raw.copy()
@@ -24,21 +33,20 @@ def get_data(file_path="data/visits.csv"):
         print(f"Error: '{file_path}' file not found.")
         raise
 
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean the dataframe by filling missing values and dropping unnecessary columns.
 
-def clean_data(df):
+    Args:
+        df (pd.DataFrame): Input dataframe.
+
+    Returns:
+        pd.DataFrame: Cleaned dataframe.
+    """
     if "referrer" in df.columns:
         df["referrer"] = df["referrer"].fillna("direct")
 
-    columns_to_fill_unknown = [
-        "hostname",
-        "browser_version",
-        "os_version",
-        "browser",
-        "os",
-        "device",
-        "user_agent_raw",
-    ]
-    for col in columns_to_fill_unknown:
+    for col in names.COLUMNS_TO_FILL_UNKNOWN:
         if col in df.columns:
             df[col] = df[col].fillna("Unknown")
 
@@ -46,11 +54,19 @@ def clean_data(df):
         df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
         df.dropna(subset=["timestamp"], inplace=True)
 
-    df.drop(columns=["_id", "date", "time"], inplace=True, errors="ignore")
+    df.drop(columns=names.COLUMNS_TO_DROP_INITIAL, inplace=True, errors="ignore")
     return df
 
+def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create new features from existing columns.
 
-def engineer_features(df):
+    Args:
+        df (pd.DataFrame): Dataframe with cleaned data.
+
+    Returns:
+        pd.DataFrame: Dataframe with new features.
+    """
     if "user_agent_raw" in df.columns:
         df["is_user_agent_bot"] = df["user_agent_raw"].str.contains(
             "bot|crawler|spider", case=False, na=False
@@ -77,49 +93,44 @@ def engineer_features(df):
     
     return df
 
+def encode_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Encode categorical features and prepare data for modeling.
 
-def encode_features(df):
+    Args:
+        df (pd.DataFrame): Dataframe with engineered features.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]: 
+            - Original dataframe with encoded columns.
+            - Model-ready dataframe (numeric only).
+    """
     encoders = {}
-    categorical_cols = ["browser", "os", "device", "referrer", "path"]
+    
+    os.makedirs(names.ENCODING_DIR, exist_ok=True)
 
-    encoding_dir = "models/Encoding"
-    os.makedirs(encoding_dir, exist_ok=True)
-
-    for col in categorical_cols:
+    for col in names.CATEGORICAL_COLS:
         if col in df.columns:
             le = LabelEncoder()
             df[col + "_encoded"] = le.fit_transform(df[col].astype(str))
             encoders[col] = le
-            joblib.dump(le, os.path.join(encoding_dir, f"{col}_encoder.pkl"))
+            joblib.dump(le, os.path.join(names.ENCODING_DIR, f"{col}_encoder.pkl"))
 
-    columns_to_drop_for_model = [
-        "user_agent_raw",
-        "ip_address",
-        "hostname",
-        "timestamp",
-        "date_only",
-        "day_of_week_name",
-        "browser",
-        "os",
-        "device",
-        "referrer",
-        "path",
-        "browser_version",
-        "os_version",
-        "hour",
-        "day_of_week",
-    ]
-    
-    df_model_ready = df.drop(columns=columns_to_drop_for_model, errors="ignore")
+    df_model_ready = df.drop(columns=names.COLUMNS_TO_DROP_FOR_MODEL, errors="ignore")
     df_model_ready = df_model_ready.apply(pd.to_numeric, errors="coerce").fillna(0)
     
     return df, df_model_ready
 
+def run_visualizations(dataframe: pd.DataFrame) -> None:
+    """
+    Generate and save various visualizations.
 
-def run_visualizations(dataframe):
+    Args:
+        dataframe (pd.DataFrame): Dataframe to visualize.
+    """
     sns.set(style="whitegrid")
     
-    os.makedirs("materials", exist_ok=True)
+    os.makedirs(names.MATERIALS_DIR, exist_ok=True)
 
     if "browser" in dataframe.columns:
         plt.figure(figsize=(12, 7))
@@ -134,7 +145,7 @@ def run_visualizations(dataframe):
         )
         plt.xlabel("Number of Visits")
         plt.ylabel("Browser")
-        plt.savefig(TOP_BROWSERS_IMAGE_PATH)
+        plt.savefig(names.TOP_BROWSERS_IMAGE_PATH)
         plt.close()
 
     if (
@@ -158,7 +169,7 @@ def run_visualizations(dataframe):
             colors=["#ff9999", "#66b3ff", "#99ff99"],
         )
         plt.axis("equal")
-        plt.savefig(DEVICE_DISTRIBUTION_IMAGE_PATH)
+        plt.savefig(names.DEVICE_DISTRIBUTION_IMAGE_PATH)
         plt.close()
 
     if "path" in dataframe.columns:
@@ -174,7 +185,7 @@ def run_visualizations(dataframe):
         plt.title("Top 10 Most Visited Pages", fontsize=16)
         plt.xlabel("Number of Visits")
         plt.ylabel("Page Path")
-        plt.savefig(TOP_PAGES_IMAGE_PATH)
+        plt.savefig(names.TOP_PAGES_IMAGE_PATH)
         plt.close()
 
     if "referrer" in dataframe.columns:
@@ -192,7 +203,7 @@ def run_visualizations(dataframe):
             plt.title('Top 10 Referrer Sources (excluding "direct")', fontsize=16)
             plt.xlabel("Number of Visits")
             plt.ylabel("Source")
-            plt.savefig(TOP_REFERRERS_IMAGE_PATH)
+            plt.savefig(names.TOP_REFERRERS_IMAGE_PATH)
             plt.close()
 
     if "hour" in dataframe.columns:
@@ -201,7 +212,7 @@ def run_visualizations(dataframe):
         plt.title("Visit Activity by Hour of Day", fontsize=16)
         plt.xlabel("Hour of Day (0-23)")
         plt.ylabel("Number of Visits")
-        plt.savefig(HOURLY_ACTIVITY_IMAGE_PATH)
+        plt.savefig(names.HOURLY_ACTIVITY_IMAGE_PATH)
         plt.close()
 
     if "day_of_week_name" in dataframe.columns:
@@ -226,7 +237,7 @@ def run_visualizations(dataframe):
         plt.xlabel("Day of Week")
         plt.ylabel("Number of Visits")
         plt.xticks(rotation=45)
-        plt.savefig(WEEKLY_ACTIVITY_IMAGE_PATH)
+        plt.savefig(names.WEEKLY_ACTIVITY_IMAGE_PATH)
         plt.close()
 
     if "date_only" in dataframe.columns:
@@ -239,7 +250,7 @@ def run_visualizations(dataframe):
         plt.grid(True)
         plt.xticks(rotation=45)
         plt.tight_layout()
-        plt.savefig(DAILY_VISITS_TREND_IMAGE_PATH)
+        plt.savefig(names.DAILY_VISITS_TREND_IMAGE_PATH)
         plt.close()
 
     if "is_bot" in dataframe.columns:
@@ -256,7 +267,7 @@ def run_visualizations(dataframe):
                 f"Bot ({target_counts.get(True, 0)})",
             ],
         )
-        plt.savefig(CLASS_IMBALANCE_IMAGE_PATH)
+        plt.savefig(names.CLASS_IMBALANCE_IMAGE_PATH)
         plt.close()
 
     important_cols = [
@@ -293,11 +304,17 @@ def run_visualizations(dataframe):
             t.set_text(l)
 
         g._legend.set_title("Class")
-        plt.savefig(PAIRPLOT_IMAGE_PATH)
+        plt.savefig(names.PAIRPLOT_IMAGE_PATH)
         plt.close()
 
 
-def train_model(df_model_ready):
+def train_model(df_model_ready: pd.DataFrame) -> None:
+    """
+    Train a Random Forest model and evaluate it.
+
+    Args:
+        df_model_ready (pd.DataFrame): Dataframe ready for modeling (numeric only).
+    """
     if "is_bot" not in df_model_ready.columns:
         print("Error: 'is_bot' column not found in dataframe.")
         return
@@ -312,26 +329,15 @@ def train_model(df_model_ready):
     X_test_scaled = scaler.transform(X_test)
 
     print("Training Random Forest Model...")
-    model = RandomForestClassifier(
-        criterion="gini",
-        n_estimators=200,
-        max_depth=15,
-        max_features="sqrt",
-        min_samples_leaf=1,
-        min_samples_split=2,
-        class_weight="balanced",
-        random_state=42,
-        n_jobs=-1,
-    )
+    model = RandomForestClassifier(**names.RANDOM_FOREST_PARAMS)
     model.fit(X_train_scaled, y_train)
 
     print("\n--- Model Evaluation ---")
     y_pred = model.predict(X_test_scaled)
     print(classification_report(y_test, y_pred))
 
-    models_dir = "models"
-    os.makedirs(models_dir, exist_ok=True)
+    os.makedirs(names.MODELS_DIR, exist_ok=True)
 
-    joblib.dump(scaler, os.path.join(models_dir, "Scaler.pkl"))
-    joblib.dump(model, os.path.join(models_dir, "Random_forest_model.pkl"))
-    print(f"Model saved to {models_dir}")
+    joblib.dump(scaler, names.SCALER_PATH)
+    joblib.dump(model, names.MODEL_PATH)
+    print(f"Model saved to {names.MODELS_DIR}")
