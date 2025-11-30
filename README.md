@@ -1,328 +1,273 @@
-# 📊 Վեբ-թրաֆիկում Բոտերի Հայտնաբերում Մեքենայական Ուսուցման Միջոցով
+# 📊 Web Traffic Bot Detection Using Machine Learning
 
-**Հեղինակ:** Կարեն Պողոսյան  
-**Ամսաթիվ:** 10.11.2025
-
----
-
-## 🎯 Ամփոփագիր
-
-Սույն նախագիծը լուծում է վեբ-թրաֆիկում ավտոմատացված բոտերի հայտնաբերման խնդիրը՝ մեքենայական ուսուցման մեթոդների կիրառմամբ։ Իրականացվել է տվյալների խորքային հետազոտական վերլուծություն (EDA), մշակվել են վարքագծային նոր հատկանիշներ և համեմատվել են հինգ դասակարգման ալգորիթմներ։ **Random Forest** մոդելը ցուցաբերել է գերազանց արդյունավետություն՝ հասնելով **F2-Score ~0.995**, ինչը վկայում է բոտերի գրեթե անթերի հայտնաբերման մասին։ Աշխատանքը հիմնավորում է վարքագծային վերլուծության վրա հիմնված մոտեցումների գերազանցությունը և առաջարկում է գործնական լուծում վերլուծական տվյալների որակի բարձրացման և կայքի անվտանգության բարելավման համար։
+**Author:** Karen Poghosyan
+**Date:** 10.11.2025
 
 ---
 
-## 🚀 Հիմնական Հնարավորությունները
+## 🎯 Summary
 
-### **Տվյալների Մշակում (Data Processing)**
-- Բացակայող տվյալների խելացի լրացում
-- Վարքագծային հատկանիշների ինժեներինգ (IP վիճակագրություն, ժամանակային հատկանիշներ)
-- Կատեգորիկ տվյալների կոդավորում (Label Encoding)
-- Տվյալների ստանդարտացում (StandardScaler)
-
-### **Վիզուալիզացիա (Visualization)**
-- 📊 Թոփ բրաուզերներ, էջեր և ռեֆերալներ
-- 📱 Այցելությունների բաշխումն ըստ սարքերի, ժամերի և շաբաթվա օրերի
-- 📈 Դասերի անհավասարակշռության և հատկանիշների կապերի պատկերում
-- 🎯 Confusion Matrix և Feature Importance վիզուալիզացիա
-- Բոլոր գրաֆիկները պահպանվում են `materials/` պանակում
-
-### **Մոդելի Ուսուցում (Model Training)**
-- Random Forest Classifier մոդելի ուսուցում
-- Տվյալների ստանդարտացում StandardScaler-ով
-- Մոդելի, scaler-ի և encoders-ների պահպանում `.pkl` ֆորմատով
-- Class imbalance-ի շտկում `class_weight='balanced'` պարամետրով
-
-### **Կանխատեսումներ (Predictions)**
-- Նոր տվյալների ավտոմատ մշակում
-- Real-time բոտերի հայտնաբերում
-- Կանխատեսումների պահպանում `data/predictions_result.csv` ֆայլում
+This project solves the problem of detecting automated bot activity in web traffic using machine learning techniques. It includes exploratory data analysis (EDA), behavioral feature engineering, and a model comparison across several classifiers. The **Random Forest** model performed best with an **F2-Score of approximately 0.995**, showing near-perfect bot detection capability under the dataset and setup used. The project demonstrates the effectiveness of behavior-based features and offers a practical solution for improving analytics accuracy and web security.
 
 ---
 
-## 📂 Նախագծի Կառուցվածքը
+## 🚀 Key Features
+
+### Data Processing
+- Intelligent handling of missing values
+- Behavioral feature engineering (IP-based statistics, temporal features)
+- Categorical encoding with LabelEncoder
+- Standardization using StandardScaler
+
+### Visualizations
+- Top browsers, pages, and referrers
+- Visit distribution by device type, hour, and day of week
+- Class imbalance visualization, pairplots and correlation checks
+- Confusion matrix and feature importance plotting
+- All charts are saved to the `materials/` directory
+
+### Model Training
+- Train a `RandomForestClassifier` on preprocessed features
+- Scale numerical features with `StandardScaler`
+- Save trained model, scaler, and encoders as `.pkl` artifacts in `models/`
+- Handle class imbalance using `class_weight='balanced'`
+
+### Predictions
+- Process new input data and perform predictions using the trained model
+- Save predictions to `data/predictions_result.csv`
+
+---
+
+## 📂 Project Structure
 
 ```
 ML-Project/
 │
-├── data/                          # Տվյալների պանակ
-│   ├── visits.csv                 # Մուտքային տվյալներ (ուսուցման համար)
-│   ├── new_data.csv              # Նոր տվյալներ (կանխատեսման համար)
-│   └── predictions_result.csv    # Կանխատեսումների արդյունքներ
+├── data/                          # Input data and prediction output
+│   ├── visits.csv                 # Input data (training)
+│   ├── new_data.csv               # New data (prediction)
+│   └── predictions_result.csv     # Prediction results output
 │
-├── materials/                     # Վիզուալիզացիաների պանակ
-│   ├── top_10_browsers.png       # Թոփ բրաուզերներ
-│   ├── device_distribution.png   # Սարքերի բաշխում
-│   ├── hourly_activity.png       # Ժամային ակտիվություն
-│   ├── confusion_matrix.png      # Confusion Matrix
-│   ├── feature_importance.png    # Հատկանիշների կարևորություն
-│   └── ... (ընդամենը 12 PNG ֆայլ)
+├── materials/                     # Visualization outputs (PNG files)
+│   ├── top_10_browsers.png
+│   ├── device_distribution.png
+│   ├── hourly_activity.png
+│   ├── confusion_matrix.png
+│   ├── feature_importance.png
+│   └── ... (other PNG files)
 │
-├── models/                        # Մոդելների պանակ
-│   ├── Encoding/                 # LabelEncoder-ների պանակ
+├── models/                        # Saved model artifacts
+│   ├── Encoding/                   # Saved LabelEncoders (pkl files)
 │   │   ├── browser_encoder.pkl
 │   │   ├── device_encoder.pkl
 │   │   ├── os_encoder.pkl
 │   │   ├── path_encoder.pkl
 │   │   └── referrer_encoder.pkl
-│   ├── Random_forest_model.pkl   # Ուսուցանված Random Forest մոդել
-│   └── Scaler.pkl                # StandardScaler օբյեկտ
+│   ├── Random_forest_model.pkl     # Trained Random Forest model
+│   └── Scaler.pkl                  # StandardScaler object
 │
-├── main.py                        # Գլխավոր ֆայլ - ծրագրի մուտքային կետ
-├── utils.py                       # Օժանդակ ֆունկցիաներ (տվյալների բեռնում, մշակում, ուսուցում)
-├── processor.py                   # Նոր տվյալների մշակում և կանխատեսումներ
-├── names.py                       # Հաստատուններ և կոնֆիգուրացիա
-├── requirements.txt               # Python գրադարանների ցանկ
-└── README.md                      # Սույն ֆայլը
+├── main.py                         # Entrypoint with train() and predict() functions
+├── utils.py                        # Core functions for data loading, preprocessing, training
+├── processor.py                    # Prediction logic for new data
+├── names.py                        # Constants and file-path configs
+├── requirements.txt                # Python dependencies
+└── README.md                        # This file
 ```
 
 ---
 
-## 🛠️ Տեղադրում և Գործարկում
+## 🛠️ Installation & Run
 
-### 1️⃣ Պատճենեք նախագիծը
+### 1️⃣ Clone the repo
 ```bash
 git clone https://github.com/Karen042009/ML-Project.git
 cd ML-Project
 ```
 
-### 2️⃣ Ստեղծեք վիրտուալ միջավայր (venv) և ակտիվացրեք այն
+### 2️⃣ Create and activate a virtual environment
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
+# venv\Scripts\activate  # Windows
 ```
 
-### 3️⃣ Տեղադրեք անհրաժեշտ գրադարանները
+### 3️⃣ Install requirements
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4️⃣ Գործարկեք ծրագիրը
+### 4️⃣ Run the project
 
-**Մոդելի ուսուցում:**
+By default, `main.py` runs the prediction pipeline on `names.DATA_FILE_PATH` when executed.
+
+**Training the model** (use the `train()` function):
 ```python
-# main.py ֆայլում փոխեք վերջին տողը
+# Edit the last line of main.py to call train(), or run this from a python one-liner
+from main import train
 train()
 ```
 
-**Կանխատեսումներ նոր տվյալների վրա:**
+**Predicting on new data** (use the `predict()` function):
 ```python
-# main.py ֆայլում փոխեք վերջին տողը
+from main import predict
 predict("data/new_data.csv")
 ```
 
-Այնուհետև գործարկեք՝
+Then execute:
 ```bash
 python main.py
 ```
 
 ---
 
-## 📊 Արդյունքներ
+## 📊 Results
 
-### Մոդելի Կատարողականություն
-**Լավագույն մոդել՝ Random Forest**
+### Model Performance
+**Best model — Random Forest**
 - **F2-Score:** ~0.995 ⭐
-- **Recall (Bot):** ~0.995 (բաց չի թողնում գրեթե ոչ մի բոտ)
-- **Precision (Bot):** ~0.997 (չի արգելափակում իրական օգտատերերին)
+- **Recall (Bot):** ~0.995
+- **Precision (Bot):** ~0.997
 
-### Ծրագրի աշխատանքից հետո
-1. `materials/` պանակում կհայտնվեն 12 վերլուծական գրաֆիկներ (PNG ֆորմատով)
-2. `models/` պանակում կպահպանվեն ուսուցանված մոդելը և օժանդակ ֆայլերը
-3. `data/predictions_result.csv` ֆայլում կլինեն կանխատեսումների արդյունքները
-
----
-
-## 📦 Օգտագործված Գրադարաններ
-
-| Գրադարան | Տարբերակ | Նպատակ |
-|----------|----------|--------|
-| **pandas** | ≥2.0.0 | Տվյալների մշակում և վերլուծություն |
-| **numpy** | ≥1.26.0 | Թվային հաշվարկներ |
-| **matplotlib** | ≥3.8.0 | Վիզուալիզացիա |
-| **seaborn** | ≥0.12.0 | Ստատիստիկական գրաֆիկներ |
-| **scikit-learn** | ≥1.3.0 | ML մոդելների կառուցում |
-| **joblib** | ≥1.3.0 | Մոդելների պահպանում/բեռնում |
+### What you should see after running
+1. Visualization PNG files in `materials/` (about a dozen files)
+2. Saved artifacts in `models/` including model, scaler and encoders
+3. `data/predictions_result.csv` with detailed per-row prediction results
 
 ---
 
-## 🔬 Հետազոտական Մեթոդաբանություն
+## 📦 Libraries Used
 
-### 1. Նախապատրաստական Փուլ
+| Library | Minimum Version | Purpose |
+|---------|------------------|---------|
+| pandas | >=2.0.0 | Data manipulation and analysis |
+| numpy | >=1.26.0 | Numeric computations |
+| matplotlib | >=3.8.0 | Plotting and visualizations |
+| seaborn | >=0.12.0 | Statistical visualizations |
+| scikit-learn | >=1.3.0 | Machine learning models and preprocessing |
+| joblib | >=1.3.0 | Model serialization/deserialization |
 
-#### 1.1 Խնդրի Նույնականացում
-Վեբ-թրաֆիկի տվյալների մեջ թաքնված է անտեսանելի խնդիր՝ ավտոմատացված բոտերի զգալի քանակ, որը՝
-- ❌ Խեղաթյուրում է վերլուծական տվյալները
-- ❌ Արհեստականորեն ծանրաբեռնում է սերվերները
-- ❌ Ստեղծում է անվտանգության ռիսկեր
-- ❌ Հանգեցնում է սխալ բիզնես որոշումների
+---
 
-**Ընտրված լուծում:** Bot Detection՝ որպես ամենահրատապ և կիրառական խնդիր։
+## 🔬 Research Methodology
 
-#### 1.2 Նպատակների Սահմանում (SMART)
-**Գլխավոր նպատակ:** Ստեղծել ML դասակարգիչ՝ ≥95% F2-Score ցուցանիշով։
+### 1. Problem Framing
+Detect automated bot activity in website logs which can:
+- skew analytics
+- overload servers
+- pose security risks
+- lead to incorrect business decisions
 
-**Կոնկրետ խնդիրներ:**
-1. ✅ Տվյալների խորքային մաքրում և EDA
-2. ✅ Վարքագծային հատկանիշների ինժեներինգ
-3. ✅ Առնվազն 4 ալգորիթմի համեմատություն
-4. ✅ Լավագույն մոդելի ընտրություն
+**Solution:** Behavioral-based Bot Detection.
 
-#### 1.3 Պատճառահետևանքային Վերլուծություն («5 Ինչու»)
-1. **Ինչու՞ են որոշ այցելություններ կասկածելի?** → Վարքագիծը տարբերվում է մարդկայինից
-2. **Ինչո՞վ է տարբերվում?** → Չափազանց արագ, մեծ քանակությամբ, ոչ ստանդարտ ժամերի
-3. **Ինչու՞ են այդպիսին?** → Ավտոմատացված սկրիպտներ են
-4. **Ինչու՞ են սկրիպտներն այդպես աշխատում?** → Ծրագրավորված են կրկնվող գործողությունների
-5. **Ինչպե՞ս է արտահայտվում տվյալներում?** → Մեկ IP-ից բազմաթիվ հարցումներ, ոչ ստանդարտ User-Agent-ներ
+### 1.1 Goals (SMART)
+**Main objective:** Build an ML classifier with at least 95% F2-Score.
 
-**Արդյունք:** Հիմնավորվեց `visits_per_ip`, `time_since_last_visit_ip` և `is_user_agent_bot` հատկանիշների ստեղծումը։
+Key steps:
+1. EDA and deep data cleaning
+2. Behavioral feature engineering
+3. Compare several classification algorithms
+4. Choose and save the best-performing model
 
-### 2. Պլանավորման և Հետազոտության Փուլ
+### 1.2 Cause Analysis (5 Whys)
+1. Why are some visits suspicious? → Behavior differs from humans
+2. How do they differ? → Very fast, high volume, unusual hours
+3. Why? → Automated scripts
+4. Why are scripts doing this? → Repeating actions triggered by bots
+5. How does this show up in data? → Multiple requests from same IP; odd user-agents
 
-#### 2.1 Գրականության Ուսումնասիրություն
-- 📚 Google Scholar և arXiv.org հարթակների ուսումնասիրություն
-- 📖 Scikit-learn, Pandas, Seaborn փաստաթղթավորման վերլուծություն
-- ✅ Եզրակացություն՝ վարքագծային վերլուծությունը ամենաարդյունավետն է
+Result: Created features like `visits_per_ip`, `time_since_last_visit_ip` and `is_user_agent_bot`.
 
-#### 2.2 Տեխնոլոգիական Գործիքակազմ
-- **Pandas:** Տվյալների մշակում և վերլուծություն
-- **Matplotlib & Seaborn:** Տեսողական հետազոտություն և EDA
-- **Scikit-learn:** ML մոդելների կառուցում, ուսուցում և գնահատում
+### 2. Research & Planning
+Literature review: Google Scholar, arXiv, and scikit-learn/pandas documentation pointed to behavior-based features as effective.
 
-� **Ծախսեր:** Զրո (բաց կոդով գործիքներ)
+### 3. Implementation & Pipeline
 
-### 3. Իրականացման Փուլ
+Pipeline overview:
+1. Load data → 2. Clean → 3. Feature engineering → 4. Encoding → 5. Scaling → 6. Modeling
 
-#### 3.1 Տվյալների Մշակման Pipeline
-```
-1. Տվյալների բեռնում → 2. Մաքրում → 3. Feature Engineering → 
-4. Կոդավորում → 5. Ստանդարտացում → 6. Մոդելավորում
-```
+Major pipeline steps:
+- Missing values filled (`Unknown`, `direct`)
+- Drop invalid timestamps
+- Remove unused columns (`_id`, `date`, `time`)
+- Feature engineering (per-IP stats, cyclic temporal features, UA bot indicators)
+- Label encoding for categorical fields and storing encoders
+- StandardScaler for normalization
+- Random Forest with `class_weight='balanced'` trained on full dataset
 
-**Մանրամասն քայլեր:**
-1. **Տվյալների բեռնում և մաքրում**
-   - Բացակայող արժեքների լրացում (`Unknown`, `direct`)
-   - Անվավեր timestamp-երի հեռացում
-   - Ավելորդ սյուների հեռացում (`_id`, `date`, `time`)
+### Tech stack & Implementation
+- Language: Python 3
+- IDE: Visual Studio Code (suggested)
+- Modular structure: `main.py`, `utils.py`, `processor.py`, `names.py`.
 
-2. **Feature Engineering**
-   - IP վիճակագրություն՝ `visits_per_ip`, `unique_paths_per_ip`
-   - Ժամանակային հատկանիշներ՝ `hour_sin`, `hour_cos`, `day_of_week_sin`, `day_of_week_cos`
-   - User-Agent վերլուծություն՝ `is_user_agent_bot`
-   - Ժամանակային տարբերություն՝ `time_since_last_visit_ip`
+### 4. Evaluation and Results
+Compared 5 algorithms with a 70/30 train/test split.
 
-3. **Կոդավորում**
-   - Label Encoding՝ `browser`, `os`, `device`, `referrer`, `path`
-   - Encoders-ների պահպանում հետագա օգտագործման համար
-
-4. **Ստանդարտացում**
-   - StandardScaler կիրառում բոլոր թվային հատկանիշների վրա
-
-5. **Մոդելավորում**
-   - Random Forest Classifier
-   - `class_weight='balanced'` դասերի անհավասարակշռության համար
-   - Ուսուցում ամբողջ տվյալների բազայի վրա
-
-#### 3.2 Իրականացում
-- 💻 **Լեզու:** Python 3
-- 🛠️ **IDE:** Visual Studio Code
-- 📦 **Ճարտարապետություն:** Մոդուլային կառուցվածք
-  - `main.py` - Գլխավոր հոսքագիծ
-  - `utils.py` - Տվյալների մշակում և ուսուցում
-  - `processor.py` - Կանխատեսումների լոգիկա
-  - `names.py` - Կոնֆիգուրացիա
-
-### 4. Փորձարկման և Արդյունքների Փուլ
-
-#### 4.1 Մոդելների Համեմատություն
-Փորձարկվեցին 5 ալգորիթմներ՝ 70/30 train-test բաժանմամբ։
-
-| Մոդել | F2-Score | Recall | Precision |
+| Model | F2-Score | Recall | Precision |
 |-------|----------|--------|-----------|
-| **Random Forest** ⭐ | **~0.995** | **~0.995** | **~0.997** |
+| Random Forest (best) | ~0.995 | ~0.995 | ~0.997 |
 | Gradient Boosting | ~0.990 | ~0.988 | ~0.995 |
 | Logistic Regression | ~0.920 | ~0.910 | ~0.935 |
 | Decision Tree | ~0.880 | ~0.870 | ~0.895 |
 | SVM | ~0.905 | ~0.895 | ~0.920 |
 
-#### 4.2 Եզրակացություններ
-1. ✅ **Վարքագծային հատկանիշները** ապացուցեցին իրենց բարձր կանխատեսողական ուժը
-2. ✅ **Random Forest**-ը ապահովեց լավագույն Precision-Recall հավասարակշռությունը
-3. ✅ Համակարգը պատրաստ է արտադրական միջավայրում տեղակայման
-4. ✅ Արդյունքները գերազանցեցին սահմանված 95% նպատակը
+Conclusions:
+1. Behavioral features significantly improve detection
+2. Random Forest provides the best Precision/Recall balance
+3. The pipeline is ready for production deployment with additional validation and dataset coverage
+4. Exceeded the goal of ≥95% F2-Score
 
-#### 4.3 Հետագա Զարգացման Ուղիներ
-- 🔧 Gradient Boosting հիպերպարամետրերի օպտիմիզացում
-- ⚡ Real-time streaming տվյալների մշակման ինտեգրում
-- 🧠 Deep Learning մոդելների փորձարկում
-- 🌐 API endpoint-ի ստեղծում արտադրական օգտագործման համար
+Future directions:
+- Hyperparameter tuning for boosting methods
+- Real-time stream processing integration
+- Experiment with deep learning models
+- Add an API endpoint for production inference
 
 ---
 
-## 💡 Օգտագործման Օրինակներ
+## 💡 Usage Examples
 
-### Մոդելի Ուսուցում
+### Training the model (Python snippet)
 ```python
 from utils import *
 
-# Մաքրել նախորդ artifacts-ները
 clear_artifacts()
-
-# Բեռնել և մշակել տվյալները
 df = get_data()
 df = clean_data(df)
 df = engineer_features(df)
-
-# Վիզուալիզացիա
 run_visualizations(df)
-
-# Կոդավորում և ուսուցում
 _, df_model_ready = encode_features(df)
 train_model(df_model_ready)
 ```
 
-### Կանխատեսումներ
+### Predictions (Python snippet)
 ```python
 import processor
 import pandas as pd
 
-# Բեռնել նոր տվյալները
 new_data = pd.read_csv("data/new_data.csv")
-
-# Կանխատեսել
 results = processor.predict_new_data(new_data)
-
-# Պահպանել արդյունքները
 results.to_csv("data/predictions_result.csv", index=False)
-
-# Տեսնել ամփոփագիրը
 print(results["is_bot_prediction"].value_counts())
 ```
 
 ---
 
-## 🔗 Հղումներ և Ռեսուրսներ
+## 🔗 Resources
 
-- 📘 [Scikit-learn Documentation](https://scikit-learn.org)
-- 📗 [Pandas Documentation](https://pandas.pydata.org)
-- 📙 [Seaborn Documentation](https://seaborn.pydata.org)
-- 📚 Bot Detection Research Papers: [Google Scholar](https://scholar.google.com), [arXiv.org](https://arxiv.org)
-- 💻 [GitHub Repository](https://github.com/Karen042009/ML-Project)
-
----
-
-## 👨‍💻 Հեղինակ
-
-**Կարեն Պողոսյան**  
-📧 Email: [karen042009@example.com]  
-🔗 GitHub: [@Karen042009](https://github.com/Karen042009)
+- Scikit-learn: https://scikit-learn.org
+- Pandas: https://pandas.pydata.org
+- Seaborn: https://seaborn.pydata.org
+- Research: Google Scholar / arXiv
+- Repository: https://github.com/Karen042009/ML-Project
 
 ---
 
-## 📄 Լիցենզիա
+## 👨‍💻 Author
 
-Այս նախագիծը բաց է հանրային օգտագործման համար՝ կրթական նպատակներով։
+**Karen Poghosyan**
+📧 Email: karen042009@example.com
+🔗 GitHub: https://github.com/Karen042009
 
 ---
 
-**⭐ Եթե այս նախագիծը օգտակար է ձեզ համար, խնդրում ենք դնել աստղ GitHub-ում!**
+**⭐ If you find this project useful, please give it a star on GitHub!**
