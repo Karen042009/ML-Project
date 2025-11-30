@@ -1,8 +1,8 @@
-
 import os
 
 # Paths
 DATA_FILE_PATH = "data/visits.csv"
+DATA_NEW_FILE_PATH = "data/new_data.csv"
 MODELS_DIR = "models"
 ENCODING_DIR = os.path.join(MODELS_DIR, "Encoding")
 MATERIALS_DIR = "materials"
@@ -17,6 +17,8 @@ WEEKLY_ACTIVITY_IMAGE_PATH = os.path.join(MATERIALS_DIR, "weekly_activity.png")
 DAILY_VISITS_TREND_IMAGE_PATH = os.path.join(MATERIALS_DIR, "daily_visits_trend.png")
 CLASS_IMBALANCE_IMAGE_PATH = os.path.join(MATERIALS_DIR, "class_imbalance.png")
 PAIRPLOT_IMAGE_PATH = os.path.join(MATERIALS_DIR, "features_pairplot.png")
+CONFUSION_MATRIX_IMAGE_PATH = os.path.join(MATERIALS_DIR, "confusion_matrix.png")
+FEATURE_IMPORTANCE_IMAGE_PATH = os.path.join(MATERIALS_DIR, "feature_importance.png")
 
 # Model Artifact Paths
 SCALER_PATH = os.path.join(MODELS_DIR, "Scaler.pkl")

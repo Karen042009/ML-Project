@@ -2,7 +2,8 @@ import pandas as pd
 import sys
 import seaborn as sns
 import matplotlib
-matplotlib.use('Agg') 
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import joblib
@@ -10,20 +11,16 @@ import os
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+from sklearn.metrics import (
+    classification_report,
+    confusion_matrix,
+    ConfusionMatrixDisplay,
+)
 from typing import Tuple, Optional
 import names
 
+
 def get_data(file_path: str = names.DATA_FILE_PATH) -> pd.DataFrame:
-    """
-    Load data from a CSV file.
-
-    Args:
-        file_path (str): Path to the CSV file.
-
-    Returns:
-        pd.DataFrame: Loaded data.
-    """
     try:
         df_raw = pd.read_csv(file_path)
         df = df_raw.copy()
@@ -33,16 +30,8 @@ def get_data(file_path: str = names.DATA_FILE_PATH) -> pd.DataFrame:
         print(f"Error: '{file_path}' file not found.")
         raise
 
+
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Clean the dataframe by filling missing values and dropping unnecessary columns.
-
-    Args:
-        df (pd.DataFrame): Input dataframe.
-
-    Returns:
-        pd.DataFrame: Cleaned dataframe.
-    """
     if "referrer" in df.columns:
         df["referrer"] = df["referrer"].fillna("direct")
 
@@ -57,16 +46,8 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     df.drop(columns=names.COLUMNS_TO_DROP_INITIAL, inplace=True, errors="ignore")
     return df
 
+
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create new features from existing columns.
-
-    Args:
-        df (pd.DataFrame): Dataframe with cleaned data.
-
-    Returns:
-        pd.DataFrame: Dataframe with new features.
-    """
     if "user_agent_raw" in df.columns:
         df["is_user_agent_bot"] = df["user_agent_raw"].str.contains(
             "bot|crawler|spider", case=False, na=False
@@ -74,8 +55,10 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
     if "ip_address" in df.columns:
         df["visits_per_ip"] = df.groupby("ip_address")["timestamp"].transform("count")
-        df["unique_paths_per_ip"] = df.groupby("ip_address")["path"].transform("nunique")
-        
+        df["unique_paths_per_ip"] = df.groupby("ip_address")["path"].transform(
+            "nunique"
+        )
+
         df = df.sort_values(by=["ip_address", "timestamp"])
         time_diff = df.groupby("ip_address")["timestamp"].diff().dt.total_seconds()
         df["time_since_last_visit_ip"] = time_diff.fillna(time_diff.mean())
@@ -90,23 +73,13 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 24)
         df["day_of_week_sin"] = np.sin(2 * np.pi * df["day_of_week"] / 7)
         df["day_of_week_cos"] = np.cos(2 * np.pi * df["day_of_week"] / 7)
-    
+
     return df
 
+
 def encode_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Encode categorical features and prepare data for modeling.
-
-    Args:
-        df (pd.DataFrame): Dataframe with engineered features.
-
-    Returns:
-        Tuple[pd.DataFrame, pd.DataFrame]: 
-            - Original dataframe with encoded columns.
-            - Model-ready dataframe (numeric only).
-    """
     encoders = {}
-    
+
     os.makedirs(names.ENCODING_DIR, exist_ok=True)
 
     for col in names.CATEGORICAL_COLS:
@@ -118,18 +91,13 @@ def encode_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     df_model_ready = df.drop(columns=names.COLUMNS_TO_DROP_FOR_MODEL, errors="ignore")
     df_model_ready = df_model_ready.apply(pd.to_numeric, errors="coerce").fillna(0)
-    
+
     return df, df_model_ready
 
-def run_visualizations(dataframe: pd.DataFrame) -> None:
-    """
-    Generate and save various visualizations.
 
-    Args:
-        dataframe (pd.DataFrame): Dataframe to visualize.
-    """
+def run_visualizations(dataframe: pd.DataFrame) -> None:
     sns.set(style="whitegrid")
-    
+
     os.makedirs(names.MATERIALS_DIR, exist_ok=True)
 
     if "browser" in dataframe.columns:
@@ -208,7 +176,9 @@ def run_visualizations(dataframe: pd.DataFrame) -> None:
 
     if "hour" in dataframe.columns:
         plt.figure(figsize=(14, 6))
-        sns.countplot(x="hour", data=dataframe, palette="magma", hue="hour", legend=False)
+        sns.countplot(
+            x="hour", data=dataframe, palette="magma", hue="hour", legend=False
+        )
         plt.title("Visit Activity by Hour of Day", fontsize=16)
         plt.xlabel("Hour of Day (0-23)")
         plt.ylabel("Number of Visits")
@@ -257,7 +227,13 @@ def run_visualizations(dataframe: pd.DataFrame) -> None:
         target_counts = dataframe["is_bot"].value_counts()
 
         plt.figure(figsize=(8, 5))
-        sns.barplot(x=target_counts.index, y=target_counts.values, palette="Reds_r", hue=target_counts.index, legend=False)
+        sns.barplot(
+            x=target_counts.index,
+            y=target_counts.values,
+            palette="Reds_r",
+            hue=target_counts.index,
+            legend=False,
+        )
         plt.title('Class Imbalance ("is_bot")', fontsize=16)
         plt.ylabel("Number of Visits")
         plt.xticks(
@@ -295,9 +271,7 @@ def run_visualizations(dataframe: pd.DataFrame) -> None:
             palette={True: "red", False: "blue"},
         )
 
-        g.fig.suptitle(
-            'Pairwise Relationships by "is_bot" Class', y=1.02, fontsize=16
-        )
+        g.fig.suptitle('Pairwise Relationships by "is_bot" Class', y=1.02, fontsize=16)
 
         new_labels = ["Not Bot", "Bot"]
         for t, l in zip(g._legend.texts, new_labels):
@@ -309,12 +283,6 @@ def run_visualizations(dataframe: pd.DataFrame) -> None:
 
 
 def train_model(df_model_ready: pd.DataFrame) -> None:
-    """
-    Train a Random Forest model and evaluate it.
-
-    Args:
-        df_model_ready (pd.DataFrame): Dataframe ready for modeling (numeric only).
-    """
     if "is_bot" not in df_model_ready.columns:
         print("Error: 'is_bot' column not found in dataframe.")
         return
@@ -322,22 +290,65 @@ def train_model(df_model_ready: pd.DataFrame) -> None:
     X = df_model_ready.drop("is_bot", axis=1)
     y = df_model_ready["is_bot"]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
     scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+    X_scaled = scaler.fit_transform(X)
 
-    print("Training Random Forest Model...")
+    X_scaled_df = pd.DataFrame(X_scaled, columns=X.columns)
+
+    print("Training Random Forest Model on ALL data...")
     model = RandomForestClassifier(**names.RANDOM_FOREST_PARAMS)
-    model.fit(X_train_scaled, y_train)
+    model.fit(X_scaled_df, y)
 
-    print("\n--- Model Evaluation ---")
-    y_pred = model.predict(X_test_scaled)
-    print(classification_report(y_test, y_pred))
+    print("\n--- Model Evaluation (Training Set) ---")
+    y_pred = model.predict(X_scaled_df)
+    print(classification_report(y, y_pred))
+
+    cm = confusion_matrix(y, y_pred)
+    plt.figure(figsize=(8, 6))
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=cm, display_labels=["Not Bot", "Bot"]
+    )
+    disp.plot(cmap="Blues", values_format="d")
+    plt.title("Confusion Matrix (Training Set)")
+    plt.grid(False)
+    plt.savefig(names.CONFUSION_MATRIX_IMAGE_PATH)
+    plt.close()
+
+    if hasattr(model, "feature_importances_"):
+        importances = model.feature_importances_
+        feature_names = X.columns
+        indices = np.argsort(importances)[::-1]
+
+        plt.figure(figsize=(12, 6))
+        plt.title("Feature Importance")
+        plt.bar(range(X.shape[1]), importances[indices], align="center")
+        plt.xticks(range(X.shape[1]), feature_names[indices], rotation=90)
+        plt.tight_layout()
+        plt.savefig(names.FEATURE_IMPORTANCE_IMAGE_PATH)
+        plt.close()
 
     os.makedirs(names.MODELS_DIR, exist_ok=True)
 
     joblib.dump(scaler, names.SCALER_PATH)
     joblib.dump(model, names.MODEL_PATH)
     print(f"Model saved to {names.MODELS_DIR}")
+
+
+def clear_artifacts() -> None:
+    dirs_to_clean = [names.MATERIALS_DIR, names.MODELS_DIR]
+
+    print("Clearing artifacts...")
+    for directory in dirs_to_clean:
+        if not os.path.exists(directory):
+            continue
+
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file != ".gitkeep":
+                    file_path = os.path.join(root, file)
+                    try:
+                        os.remove(file_path)
+                        print(f"Deleted: {file_path}")
+                    except Exception as e:
+                        print(f"Error deleting {file_path}: {e}")
+    print("Artifacts cleared.")
