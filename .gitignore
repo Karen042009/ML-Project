@@ -45,7 +45,8 @@ env/
 *.csv
 *.xlsx
 *.json
-data/
+data/*
+!data/.gitkeep
 *.pkl
 *.joblib
 
