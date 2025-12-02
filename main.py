@@ -50,6 +50,8 @@ def predict(file_path):
 
     try:
         new_data = pd.read_csv(file_path)
+        if "is_bot" in new_data.columns:
+            new_data = new_data.drop(columns=["is_bot"])
         print("Data loaded successfully.")
 
         print("Predicting...")
@@ -71,4 +73,4 @@ def predict(file_path):
         print(f"An error occurred during the prediction phase: {e}")
 
 
-predict(names.DATA_FILE_PATH)
+predict(names.DATA_NEW_FILE_PATH)
