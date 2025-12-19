@@ -1,7 +1,7 @@
 import os
 
 # Paths
-DATA_FILE_PATH = "data/visits.csv"
+DATA_FILE_PATH = "data/visits2.csv"
 DATA_NEW_FILE_PATH = "data/new_data.csv"
 MODELS_DIR = "models"
 ENCODING_DIR = os.path.join(MODELS_DIR, "Encoding")
@@ -21,8 +21,7 @@ CONFUSION_MATRIX_IMAGE_PATH = os.path.join(MATERIALS_DIR, "confusion_matrix.png"
 FEATURE_IMPORTANCE_IMAGE_PATH = os.path.join(MATERIALS_DIR, "feature_importance.png")
 
 # Model Artifact Paths
-SCALER_PATH = os.path.join(MODELS_DIR, "Scaler.pkl")
-MODEL_PATH = os.path.join(MODELS_DIR, "Random_forest_model.pkl")
+FINAL_MODEL_PATH = os.path.join(MODELS_DIR, "Final_Bot_Detection_Model.pkl")
 
 # Data Cleaning & Feature Engineering
 COLUMNS_TO_FILL_UNKNOWN = [
