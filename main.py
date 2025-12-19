@@ -3,6 +3,8 @@ import processor
 import sys
 import pandas as pd
 import names
+
+
 def train():
     print("\n=== Starting Pipeline Training ===")
     try:
@@ -22,6 +24,8 @@ def train():
         print("Finished training successfully.")
     except Exception as e:
         print(f"An error occurred during the training pipeline: {e}")
+
+
 def predict(file_path):
     print(f"\n=== Starting Prediction Pipeline for: {file_path} ===")
     if not os.path.exists(file_path):
@@ -47,5 +51,7 @@ def predict(file_path):
         print("Prediction phase completed.")
     except Exception as e:
         print(f"An error occurred during the prediction phase: {e}")
+
+
 if __name__ == "__main__":
     predict("data/new_data.csv")

@@ -2,6 +2,7 @@ import pandas as pd
 import sys
 import seaborn as sns
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,10 +23,13 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.impute import SimpleImputer
 from typing import Tuple, Optional
 import names
+
+
 class AdvancedBotPreprocessor(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.ip_history_ = {}
         self.path_history_ = {}
+
     def fit(self, X, y=None):
         df = X.copy()
         if "timestamp" in df.columns:
@@ -39,6 +43,7 @@ class AdvancedBotPreprocessor(BaseEstimator, TransformerMixin):
                         df.groupby("ip_address")["path"].nunique().to_dict()
                     )
         return self
+
     def transform(self, X):
         df = X.copy()
         if "referrer" in df.columns:
@@ -79,6 +84,8 @@ class AdvancedBotPreprocessor(BaseEstimator, TransformerMixin):
             df["unique_paths_per_ip"] = 1
             df["time_since_last_visit_ip"] = 0
         return df
+
+
 def get_data(file_path: str = names.DATA_FILE_PATH) -> pd.DataFrame:
     try:
         df_raw = pd.read_csv(file_path)
@@ -88,6 +95,8 @@ def get_data(file_path: str = names.DATA_FILE_PATH) -> pd.DataFrame:
     except FileNotFoundError:
         print(f"Error: '{file_path}' file not found.")
         raise
+
+
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     if "referrer" in df.columns:
         df["referrer"] = df["referrer"].fillna("direct")
@@ -99,6 +108,8 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         df.dropna(subset=["timestamp"], inplace=True)
     df.drop(columns=names.COLUMNS_TO_DROP_INITIAL, inplace=True, errors="ignore")
     return df
+
+
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     if "user_agent_raw" in df.columns:
         df["is_user_agent_bot"] = df["user_agent_raw"].str.contains(
@@ -124,6 +135,8 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         df["day_of_week_sin"] = np.sin(2 * np.pi * df["day_of_week"] / 7)
         df["day_of_week_cos"] = np.cos(2 * np.pi * df["day_of_week"] / 7)
     return df
+
+
 def encode_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     encoders = {}
     os.makedirs(names.ENCODING_DIR, exist_ok=True)
@@ -136,6 +149,8 @@ def encode_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_model_ready = df.drop(columns=names.COLUMNS_TO_DROP_FOR_MODEL, errors="ignore")
     df_model_ready = df_model_ready.apply(pd.to_numeric, errors="coerce").fillna(0)
     return df, df_model_ready
+
+
 def run_visualizations(dataframe: pd.DataFrame) -> None:
     sns.set(style="whitegrid")
     os.makedirs(names.MATERIALS_DIR, exist_ok=True)
@@ -306,6 +321,8 @@ def run_visualizations(dataframe: pd.DataFrame) -> None:
             legend.set_title("Class")
         plt.savefig(names.PAIRPLOT_IMAGE_PATH)
         plt.close()
+
+
 def train_model(df_train: pd.DataFrame) -> None:
     if "is_bot" not in df_train.columns:
         print("Error: 'is_bot' column not found in dataframe.")
@@ -387,13 +404,17 @@ def train_model(df_train: pd.DataFrame) -> None:
         plt.figure(figsize=(12, 6))
         plt.title("Feature Importance")
         plt.bar(range(len(importances)), importances[indices], align="center")
-        plt.xticks(range(len(importances)), [feature_names[i] for i in indices], rotation=90)
+        plt.xticks(
+            range(len(importances)), [feature_names[i] for i in indices], rotation=90
+        )
         plt.tight_layout()
         plt.savefig(names.FEATURE_IMPORTANCE_IMAGE_PATH)
         plt.close()
     os.makedirs(names.MODELS_DIR, exist_ok=True)
     joblib.dump(final_pipeline, names.FINAL_MODEL_PATH)
     print(f"Pipeline saved to {names.FINAL_MODEL_PATH}")
+
+
 def clear_artifacts() -> None:
     dirs_to_clean = [names.MATERIALS_DIR, names.MODELS_DIR]
     print("Clearing artifacts...")
