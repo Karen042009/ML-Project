@@ -42,7 +42,7 @@ ML-Project/
 │   └── ... (other EDA charts)
 │
 ├── models/                        # Saved model artifacts
-│   └── Final_Bot_Detection_Model.pkl  # The complete scikit-learn Pipeline
+│   └── bot_detection_pipeline.pkl  # The complete scikit-learn Pipeline
 │
 ├── main.py                         # Entrypoint for training and basic prediction
 ├── utils.py                        # Pipeline definition and custom transformers
@@ -75,7 +75,7 @@ To perform predictions on new raw data:
 ```bash
 python3 main.py
 ```
-This uses `processor.py` to load the `Final_Bot_Detection_Model.pkl` and process the data defined in `names.DATA_NEW_FILE_PATH`.
+This uses `processor.py` to load the `bot_detection_pipeline.pkl` and process the data defined in `names.DATA_NEW_FILE_PATH`.
 
 ### 4️⃣ Validation
 To compare predictions against labeled data (last 255 rows of `visits2.csv`):
